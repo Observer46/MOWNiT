@@ -1,6 +1,12 @@
 # Makefile
 CCPP = g++ -Wall -std=c++17
 
+all:
+	make cw01_02
+	make cw03
+	make cw04
+	make cw05
+
 cw01_02: cw01_02.cpp
 	$(CCPP) cw01_02.cpp -o cw01_02
 
@@ -17,3 +23,4 @@ clean:
 	rm -f cw01_02
 	rm -f cw03
 	rm -f cw04
+	rm -f cw05
