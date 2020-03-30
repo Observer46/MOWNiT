@@ -252,8 +252,8 @@ template <typename T>
 int gaussian_elimination(AGHMatrix<T>& mat){
   unsigned rows = mat.get_rows();
   unsigned cols = mat.get_cols();
-  int sign = 1;
 
+  int sign = 1;
   for(unsigned i=0; i < cols; i++)
   {
     unsigned j=i;
@@ -272,9 +272,6 @@ int gaussian_elimination(AGHMatrix<T>& mat){
       for(unsigned k=i; k < cols; k++)                // Dokonujaca eliminacji tak, by wyzerowac i-ta kolumne
         mat(j, k) -= mul_coeff * eliminating_row[k];
     }
-    std::cout << mat;
-    
   }
-
   return sign;
 }
