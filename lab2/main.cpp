@@ -1,25 +1,17 @@
-#include "aghMatrix.h"
+#include <gtest/gtest.h>
+
 #include <iostream>
+#include <iomanip>
+#include <string>
 
-int main() 
-{
-    // initialize matrices using init value
-    AGHMatrix<double> mat1(5, 5, 1.2);
-    AGHMatrix<double> mat2(5, 5, 2.8);
-
-    // Uncomment when implemented
-    AGHMatrix<double> mat3 = mat1 * mat2;
-    std::cout << mat3;
-    std::cout << mat1.is_symmetric() << std::endl;
-
-    // initialize matrix using specified values
-    std::vector<std::vector<double>> init { { 1.0, 2.0, 3.0 }, 
-                                            { 4.0, 5.0, 6.0 }, 
-                                            { 7.0, 8.0, 9.0 } }; 
-
-    AGHMatrix<double> mat4(init);
-    std::cout << mat4;
-    mat4.transpose();
-    std::cout << mat4;
-    return 0;
+///////////////////////////////////
+// Zadanie 1 i 2 - aghMatrix.cpp (implementowane jako metody klasy AGHMatrix), zawiera tez eliminacje Gaussa (do liczenia wyznacznika)
+// Zadanie 3 - luFactor.cpp
+// Zadanie 4 - choleskyFactor.cpp
+// Zadanie 5 i 6 - sole.cpp (klasa dotyczaca ukladow rownan - rozwiazywanie eliminacja Gaussa i metoda Jacobiego)
+// Wszystkie testy implementowanych funkcji znajduja sie w pliku matrixTests.cpp
+///////////////////////////////////
+int main(int argc, char** argv){
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -1,7 +1,8 @@
-#pragma once 
+#pragma once
 
 #include <vector>
 #include <iostream>
+#include <stdexcept>
 
 template <typename T> class AGHMatrix 
 {
@@ -26,6 +27,13 @@ public:
     // Access the individual elements                                                                                                                                                                                               
     T& operator()(const unsigned& row, const unsigned& col);
     const T& operator()(const unsigned& row, const unsigned& col) const;
+
+    // Access whole row (added)
+    const std::vector<T>& get_whole_row(const unsigned& row) const;
+
+    // Equality of matrices (added)
+    bool operator==(const AGHMatrix<T>& rhs) const;
+    bool almost_eq(const AGHMatrix<double>& rhs) const;      // almost equal
     
     // Printing matrix
     std::ostream& operator<<(const AGHMatrix<T>& matrix);
@@ -35,12 +43,17 @@ public:
     unsigned get_cols() const;
 
     // Checking if matrix is symmetric
-    bool is_symmetric();
+    bool is_symmetric() const;
 
     // T det TODO
+    T det() const;
 
     // Transposition
     AGHMatrix<T>& transpose();
+
 };
+
+template<typename T>
+void gaussian_elimination(AGHMatrix<T>& rhs);
 
 #include "aghMatrix.cpp"

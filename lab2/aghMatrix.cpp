@@ -101,10 +101,8 @@ const T& AGHMatrix<T>::operator()(const unsigned& row, const unsigned& col) cons
 template<typename T>
 AGHMatrix<T> AGHMatrix<T>::operator+(const AGHMatrix<T>& rhs) 
 {
-  if (this -> rows != rhs.get_rows() || this -> cols != rhs.get_cols() ){
-    std::cout << "Matrices have diffrent sizes - cannot add" << std::endl;
-    throw 1;
-  }
+  if (this -> rows != rhs.get_rows() || this -> cols != rhs.get_cols() )
+    throw std::invalid_argument("Matrices have diffrent sizes - cannot add");
 
   AGHMatrix<T> resMatrix(rhs);
   
@@ -119,10 +117,8 @@ AGHMatrix<T> AGHMatrix<T>::operator+(const AGHMatrix<T>& rhs)
 template<typename T>
 AGHMatrix<T> AGHMatrix<T>::operator*(const AGHMatrix<T>& rhs) 
 {
-  if ( this -> cols != rhs.get_rows() ){
-    std::cout << "Matrices have diffrent sizes - cannot multiply" << std::endl;
-    throw 2;
-  }
+  if ( this -> cols != rhs.get_rows() )
+    throw std::invalid_argument("Matrices have diffrent sizes - cannot multiply");
 
   unsigned new_rows = this -> rows;
   unsigned new_cols = rhs.get_cols();
@@ -154,15 +150,72 @@ std::ostream& operator<<(std::ostream& stream, const AGHMatrix<T>& matrix)
   return stream;
 }
 
-// Checking if matrix is symmetric
 template<typename T>
-bool AGHMatrix<T>::is_symmetric(){
-  for (unsigned i = 0; i < rows; i++)
-    for (unsigned j = 0; j < i; j++)
-      if (this -> matrix[i][j] != this -> matrix[j][i])
+bool AGHMatrix<T>::operator==(const AGHMatrix<T>& rhs) const{
+  if( this->rows != rhs.get_rows() || this->cols != rhs.get_cols() ) 
+    return false;
+
+  for(unsigned i=0; i < rows; i++)
+    for(unsigned j=0; j < cols; j++)
+      if(this->matrix[i][j] != rhs(i, j))
         return false;
 
   return true;
+}
+
+template<typename T>
+bool AGHMatrix<T>::almost_eq(const AGHMatrix<double>& rhs) const{
+  if( this->rows != rhs.get_rows() || this->cols != rhs.get_cols() ) 
+    return false;
+
+double abs_err = 1e-10;
+  for(unsigned i=0; i < rows; i++)
+    for(unsigned j=0; j < cols; j++)
+      if( abs(this->matrix[i][j] - rhs(i, j) > abs_err ))
+        return false;
+
+  return true;
+}
+
+// Zadanie 2
+//////////////////////////////////
+
+// Access whole row (added)
+template<typename T>
+const std::vector<T>& AGHMatrix<T>::get_whole_row(const unsigned& row) const{
+  return this -> matrix[row];
+}
+
+// Checking if matrix is symmetric
+template<typename T>
+bool AGHMatrix<T>::is_symmetric() const{
+  if(this->rows != this->cols)    // Jesli nie jest kwadratowa to nie moze byc symetryczna
+    return false;
+
+  for (unsigned i = 0; i < rows; i++)
+    for (unsigned j = 0; j < i; j++)
+      if (this -> matrix[i][j] != this -> matrix[j][i])   
+        return false;
+
+  return true;
+}
+
+// Determinant
+template<typename T>
+T AGHMatrix<T>::det() const{
+  if (rows != cols) 
+    throw std::logic_error("Cannot calculate determinant - matrix is not square!");
+
+  AGHMatrix<T> duplicate(*this);
+  gaussian_elimination(duplicate);
+  
+  T det{};
+  det += 1;
+
+  for (unsigned i=0; i < rows; i++)
+    det *= duplicate.matrix[i][i];
+
+  return det;
 }
 
 // Transposition
@@ -182,4 +235,29 @@ AGHMatrix<T>& AGHMatrix<T>::transpose(){
   this -> rows = trans_rows;
   this -> cols = trans_cols;
   return *this;
+}
+///////////////////////////////////////////
+
+// Eliminacja Gaussa (zadanie 5)
+///////////////////////// 
+template <typename T>
+void gaussian_elimination(AGHMatrix<T>& mat){
+  unsigned rows = mat.get_rows();
+  unsigned cols = mat.get_cols();
+
+  for(unsigned i=0; i < cols; i++)
+  {
+    unsigned j=i;
+    for(; j < rows && mat(j, i) == 0; j++);     // Przeskakujemy te, ktorych nie trzeba zerowac
+    if(j >= rows) continue;                     // Jesli cala kolumna jest wyzerowany to pomijamy krok eliminacji dla tej kolumny
+    std::vector<T> eliminating_row = mat.get_whole_row(j);
+
+    for(j++; j < rows; j++)                     // Na poczatku j++ poniewaz nie chcemy zerowac j-tego wiersza
+    {
+      T mul_coeff = mat(j, i) / eliminating_row[i];   // Wspolczynnik dla danego wiersza, by wyzerowac i-ta kolumne
+      for(unsigned k=i; k < cols; k++)                // Dokonujaca eliminacji tak, by wyzerowac i-ta kolumne
+        mat(j, k) -= mul_coeff * eliminating_row[k];
+    }
+    
+  }
 }
