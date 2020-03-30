@@ -186,6 +186,14 @@ const std::vector<T>& AGHMatrix<T>::get_whole_row(const unsigned& row) const{
   return this -> matrix[row];
 }
 
+// Swap two rows (added)
+template<typename T>
+void AGHMatrix<T>::swap_rows(const unsigned& i, const unsigned& j){
+  std::vector<T> tmp = this -> matrix[i];
+  this -> matrix[i] = this -> matrix[j];
+  this -> matrix[j] = tmp;
+}
+
 // Checking if matrix is symmetric
 template<typename T>
 bool AGHMatrix<T>::is_symmetric() const{
@@ -207,7 +215,7 @@ T AGHMatrix<T>::det() const{
     throw std::logic_error("Cannot calculate determinant - matrix is not square!");
 
   AGHMatrix<T> duplicate(*this);
-  gaussian_elimination(duplicate);
+  int sign = gaussian_elimination(duplicate);
   
   T det{};
   det += 1;
@@ -215,7 +223,7 @@ T AGHMatrix<T>::det() const{
   for (unsigned i=0; i < rows; i++)
     det *= duplicate.matrix[i][i];
 
-  return det;
+  return sign*det;
 }
 
 // Transposition
@@ -241,16 +249,22 @@ AGHMatrix<T>& AGHMatrix<T>::transpose(){
 // Eliminacja Gaussa (zadanie 5)
 ///////////////////////// 
 template <typename T>
-void gaussian_elimination(AGHMatrix<T>& mat){
+int gaussian_elimination(AGHMatrix<T>& mat){
   unsigned rows = mat.get_rows();
   unsigned cols = mat.get_cols();
+  int sign = 1;
 
   for(unsigned i=0; i < cols; i++)
   {
     unsigned j=i;
     for(; j < rows && mat(j, i) == 0; j++);     // Przeskakujemy te, ktorych nie trzeba zerowac
-    if(j >= rows) continue;                     // Jesli cala kolumna jest wyzerowany to pomijamy krok eliminacji dla tej kolumny
+    if(j >= rows) continue;                     // Jesli cala kolumna jest wyzerowana to pomijamy krok eliminacji dla tej kolumny
     std::vector<T> eliminating_row = mat.get_whole_row(j);
+
+    if (i != j){                                // Jesli musimy wziac inny wiersz niz i-ty, zamieniamy go
+      mat.swap_rows(i, j);
+      sign = -sign;
+    }
 
     for(j++; j < rows; j++)                     // Na poczatku j++ poniewaz nie chcemy zerowac j-tego wiersza
     {
@@ -258,6 +272,9 @@ void gaussian_elimination(AGHMatrix<T>& mat){
       for(unsigned k=i; k < cols; k++)                // Dokonujaca eliminacji tak, by wyzerowac i-ta kolumne
         mat(j, k) -= mul_coeff * eliminating_row[k];
     }
+    std::cout << mat;
     
   }
+
+  return sign;
 }

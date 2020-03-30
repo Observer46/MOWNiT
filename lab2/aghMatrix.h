@@ -31,6 +31,9 @@ public:
     // Access whole row (added)
     const std::vector<T>& get_whole_row(const unsigned& row) const;
 
+    // Swap two rows (added)
+    void swap_rows(const unsigned& i, const unsigned& j) ;
+
     // Equality of matrices (added)
     bool operator==(const AGHMatrix<T>& rhs) const;
     bool almost_eq(const AGHMatrix<double>& rhs) const;      // almost equal
@@ -50,10 +53,9 @@ public:
 
     // Transposition
     AGHMatrix<T>& transpose();
-
 };
 
 template<typename T>
-void gaussian_elimination(AGHMatrix<T>& rhs);
+int gaussian_elimination(AGHMatrix<T>& mat);
 
 #include "aghMatrix.cpp"
