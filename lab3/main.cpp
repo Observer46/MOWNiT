@@ -51,7 +51,7 @@ int main(){
 
     std::cout << "\n\t Newton method:\n";
     int max_iter[] = {20, 50, 100};
-    double h = 1e-5;
+    double h = 1e-10;
 
     for(unsigned i=0; i < precision_count; i++){
         std::pair<__float128, int> res_pair1 = Newton::newton_method(interval1, f1, precision_tab[i], max_iter[i], h);
