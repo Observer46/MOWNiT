@@ -8,17 +8,19 @@ x, y = np.loadtxt(sys.argv[1], delimiter=' ', unpack=True)
 if len(sys.argv) > 2:
     interpolated_values = sys.argv[2]
     interpolation_name = sys.argv[3]
-    N = sys.argv[4]
+    node_type = sys.argv[4]
+    N = sys.argv[5]
     inter_x, inter_y = np.loadtxt(interpolated_values, delimiter=' ', unpack=True)
 else:
     interpolation_name = ""
+    node_type = ""
     N = ""
 
 plt.plot(x, y, label='')
 
 plt.xlabel('x')
 plt.ylabel('f(x)')
-plt.title('f(x) = exp(3*cos(4*x)) ' if len(sys.argv) == 2 else interpolation_name + " N=" + N)
+plt.title('f(x) = exp(3*cos(4*x)) ' if len(sys.argv) == 2 else interpolation_name + " " + node_type + " N=" + N)
 if len(sys.argv) > 2:
     plt.plot(inter_x, inter_y, label = "Interpolated", color = 'r')
 

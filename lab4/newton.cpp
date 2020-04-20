@@ -1,6 +1,6 @@
 #include "newton.h"
 
-NewtonInterpolation::NewtonInterpolation(const std::vector<double>& nodes, const std::vector<double>& node_vals, const unsigned& N) : N{N} {
+NewtonInterpolation::NewtonInterpolation(const std::vector<double>& nodes, const std::vector<double>& node_vals, const unsigned& N) : nodes{nodes}, N{N} {
     std::vector<double> result;
     std::vector<double> divided_diffs;
     for (unsigned i=0; i < N; i++)
@@ -41,6 +41,5 @@ void NewtonInterpolation::create_plot_data(const int& point_amount, const std::p
         double val = this -> value(x);
         dataForPlot << x << " " << val << "\n";
         x += step;
-        // std::cout << x << " " << val << "\n";
     }
 }

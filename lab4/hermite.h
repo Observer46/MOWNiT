@@ -1,7 +1,15 @@
 #pragma once
+inline long int factor(int n);
 
-namespace Secant{           // Was suppoused to contain more functions, but turned out that "improved" version is much worse  
-    // Function calculation root of the function using secant method
-    std::pair<__float128,int> secant_method(const std::pair<double,double>& interval, double func(const double&), const double& eps, const int& max_iter);
-}
-#include "secant.cpp"
+class HermiteInterpolation {
+    std::vector<double> a_coefficients;
+    std::vector<double> nodes;
+    const unsigned N;
+    unsigned derivative_level;
+public:
+    HermiteInterpolation(const std::vector<double>& nodes, const std::vector<double>& node_vals, const unsigned& N);
+    ~HermiteInterpolation() = default;
+    double value(const double& x) const;
+    void create_plot_data(const int& point_amount, const std::pair<double,double>& interval, const std::string& filename) const;
+};
+#include "hermite.cpp"

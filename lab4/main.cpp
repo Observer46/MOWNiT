@@ -1,15 +1,12 @@
 #include <iostream>
 #include <cmath>
-//#include <quadmath.h>
 #include <vector>
-//#include <limits>
 #include <fstream>
 #include <string>
 
-//#include "interpolation.h"
 #include "newton.h"
 #include "lagrange.h"
-//#include "hermite.h"
+#include "hermite.h"
 
 constexpr double PI = 3.141592653589;
 
@@ -17,6 +14,14 @@ constexpr double PI = 3.141592653589;
 double f(const double& x, const double& k = 3.0, const double& m = 4.0){
     return exp(k*cos(m*x));
 }
+
+double df(const double& x, const double& k = 3.0, const double& m = 4.0){
+    return k*m * sin(m*x) * ( -exp(k*cos(m*x)) );
+}
+
+// double ddf(const double& x, const double& k = 3.0, const double& m = 4.0){
+//     return k*m*m * exp(k*cos(m*x)) * ( k*sin(m*x)*sin(m*x) - cos(m*x) );
+// }
 
 void create_plot_data(const int& point_amount, const std::pair<double,double>& interval, std::string& filename){
     double step = (interval.second - interval.first) / point_amount;
@@ -30,7 +35,7 @@ void create_plot_data(const int& point_amount, const std::pair<double,double>& i
     }
 }
 
-std::pair<std::vector<double>, std::vector<double>> get_equally_distributed_nodes(const std::pair<double,double>& interval, const int& N){
+std::pair<std::vector<double>, std::vector<double>> get_equally_distributed_nodes(const std::pair<double,double>& interval, const int& N, const bool& isHerimite){
     std::vector<double> nodes;
     std::vector<double> values;
     double step = (interval.second - interval.first) / (N - 1);
@@ -38,13 +43,19 @@ std::pair<std::vector<double>, std::vector<double>> get_equally_distributed_node
     for(int i=0; i < N; i++){
         nodes.push_back(x);
         values.push_back(f(x));
+        if (isHerimite){
+            nodes.push_back(x);
+            values.push_back(df(x));
+            // nodes.push_back(x);
+            // values.push_back(ddf(x));
+        }
         x += step;
     }
     std::pair<std::vector<double>, std::vector<double>> nodes_and_values(nodes, values);
     return nodes_and_values;
 }
 
-std::pair<std::vector<double>, std::vector<double>> get_chebyshev_nodes(const std::pair<double,double>& interval, const int& N){
+std::pair<std::vector<double>, std::vector<double>> get_chebyshev_nodes(const std::pair<double,double>& interval, const int& N, const bool& isHerimite){
     std::vector<double> nodes;
     std::vector<double> values;
     double a = interval.first;
@@ -52,9 +63,14 @@ std::pair<std::vector<double>, std::vector<double>> get_chebyshev_nodes(const st
     for(int i=1; i <= N; i++){
         double arg = PI *( (2.0*i - 1.0)/(2.0*N));
         double xi = 0.5*(a + b) + 0.5*(b - a)*cos(arg);
-        // std::cout << arg << " " << xi << "\n";
         nodes.push_back(xi);
         values.push_back(f(xi));
+        if (isHerimite){
+            nodes.push_back(xi);
+            values.push_back(df(xi));
+            // nodes.push_back(xi);
+            // values.push_back(ddf(xi));
+        }
     }
     std::pair<std::vector<double>, std::vector<double>> nodes_and_values(nodes, values);
     return nodes_and_values;
@@ -81,6 +97,7 @@ std::pair<int,int> find_best_fit(std::pair<double,double> interval, const int& m
     std::string type = typeid(T).name();
     std::string chebyshev_file =  type + "_chebyshev_err.txt";
     std::string regular_nodes_file = type + "_reg_nodes_err.txt";
+    bool isHerimite = std::is_same<T,HermiteInterpolation>::value;
 
     std::ofstream cheby_fd;
     std::ofstream reg_fd;
@@ -88,7 +105,7 @@ std::pair<int,int> find_best_fit(std::pair<double,double> interval, const int& m
     reg_fd.open(regular_nodes_file);
 
     for(int N=2; N <= max_N; N++){
-        std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_chebyshev_nodes(interval, N);
+        std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_chebyshev_nodes(interval, N, isHerimite);
         std::vector<double> nodes = nodes_and_values.first;
         std::vector<double> node_vals = nodes_and_values.second;
         T interpolation_che(nodes, node_vals, N);
@@ -103,7 +120,7 @@ std::pair<int,int> find_best_fit(std::pair<double,double> interval, const int& m
         }
         cheby_fd << N << " " << curr_fit << "\n";
 
-        nodes_and_values = get_equally_distributed_nodes(interval, N);
+        nodes_and_values = get_equally_distributed_nodes(interval, N, isHerimite);
         nodes = nodes_and_values.first;
         node_vals = nodes_and_values.second;
         T interpolation_reg(nodes, node_vals, N);
@@ -127,13 +144,14 @@ std::pair<int,int> find_best_fit(std::pair<double,double> interval, const int& m
 
 template<class T>
 void create_best_fit_data(const std::pair<double,double> & interval, const int& draw_points_amount){
-    std::pair<int,int> best_fit = find_best_fit<T>(interval, 50, draw_points_amount);
+    std::pair<int,int> best_fit = find_best_fit<T>(interval, 40, draw_points_amount);
     int best_N_reg = best_fit.first;
     int best_N_che = best_fit.second;
     std::string type = typeid(T).name();
+    bool isHerimite = std::is_same<T,HermiteInterpolation>::value;
 
     // Rownoodlegle wezly
-    std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_equally_distributed_nodes(interval, best_N_reg);
+    std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_equally_distributed_nodes(interval, best_N_reg, isHerimite);
     std::vector<double> nodes = nodes_and_values.first;
     std::vector<double> node_vals = nodes_and_values.second;
     T interpolation_reg(nodes, node_vals, best_N_reg);
@@ -141,49 +159,86 @@ void create_best_fit_data(const std::pair<double,double> & interval, const int& 
     interpolation_reg.create_plot_data(draw_points_amount, interval, type + "_best_fit_reg.txt");
 
     // Wezly Czebyszewa
-    nodes_and_values = get_chebyshev_nodes(interval, best_N_che);
+    nodes_and_values = get_chebyshev_nodes(interval, best_N_che, isHerimite);
     nodes = nodes_and_values.first;
     node_vals = nodes_and_values.second;
     T interpolation_che(nodes, node_vals, best_N_che);
     
     interpolation_che.create_plot_data(draw_points_amount, interval, type + "_best_fit_che.txt");
 }
-// Efekt Runge'go
-// Newton - N = 11
-// Lagrange - N = 11
+// Efekt Runge'go 
+// Newton - N = 9
+// Lagrange - N = 9
+// Hermite - N = 21...?
+// Tworzy pliki z wynikami dla ktorych widac efekt
+void runge_effect(const std::pair<double,double>& interval, const int& draw_points_amount){
+    const int N = 9;
+    std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_equally_distributed_nodes(interval, N, false);
+    std::vector<double> nodes = nodes_and_values.first;
+    std::vector<double> node_vals = nodes_and_values.second;
+    NewtonInterpolation newton_inter_reg(nodes, node_vals, N);
+    LagrangeInterpolation lagrange_inter_reg(nodes, node_vals, N);
+    newton_inter_reg.create_plot_data(draw_points_amount, interval, "newton_runge.txt");
+    lagrange_inter_reg.create_plot_data(draw_points_amount, interval, "lagrange_runge.txt");
+
+    const int N2 = 21;
+    nodes_and_values = get_equally_distributed_nodes(interval, N2, true);
+    nodes = nodes_and_values.first;
+    node_vals = nodes_and_values.second;
+    HermiteInterpolation hermite_inter_reg(nodes, node_vals, N2);
+    hermite_inter_reg.create_plot_data(draw_points_amount,interval, "hermite_runge?.txt");
+}
+
 int main(){
     constexpr int draw_points_amount = 1e5;
-    std::pair<double, double> interval(-2,2);
+    std::pair<double, double> interval(-3,3);
     std::string function_data_filename = "function_data.txt";
     create_plot_data(draw_points_amount, interval, function_data_filename);
 
-    std::vector<int> N_list = {7,8,9,10,11,12,13};//{ 2, 5, 8, 10, 15, 20};
+    std::vector<int> N_list = {19,20,21,22,23,24,25};// { 2, 5, 8, 10, 15, 20};
     for (const int& N : N_list){
-        std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_equally_distributed_nodes(interval, N);
+        bool isHerimite = false;
+        std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_equally_distributed_nodes(interval, N, isHerimite);
         std::vector<double> nodes = nodes_and_values.first;
         std::vector<double> node_vals = nodes_and_values.second;
         NewtonInterpolation newton_inter_reg(nodes, node_vals, N);
         LagrangeInterpolation lagrange_inter_reg(nodes, node_vals, N);
+        isHerimite = true; ////////////////////////////////////////////
+        nodes_and_values = get_chebyshev_nodes(interval, N, isHerimite);
+        nodes = nodes_and_values.first;
+        node_vals = nodes_and_values.second;
+        HermiteInterpolation hermite_inter_reg(nodes, node_vals, N);
 
         std::string outputname = "newton_reg_res_" + std::to_string(N) + ".txt";
         newton_inter_reg.create_plot_data(draw_points_amount, interval, outputname);
         outputname = "lagrange_reg_res_" + std::to_string(N) + ".txt";
         lagrange_inter_reg.create_plot_data(draw_points_amount, interval, outputname);
+        outputname = "hermite_reg_res_" + std::to_string(N) + ".txt";
+        hermite_inter_reg.create_plot_data(draw_points_amount, interval, outputname);
 
-        nodes_and_values = get_chebyshev_nodes(interval, N);
+        isHerimite = false;
+        nodes_and_values = get_chebyshev_nodes(interval, N, isHerimite);
         nodes = nodes_and_values.first;
         node_vals = nodes_and_values.second;
         NewtonInterpolation newton_inter_che(nodes, node_vals, N);
         LagrangeInterpolation lagrange_inter_che(nodes, node_vals, N);
+        isHerimite = true; ////////////////////////////////////////////
+        nodes_and_values = get_chebyshev_nodes(interval, N, isHerimite);
+        nodes = nodes_and_values.first;
+        node_vals = nodes_and_values.second;
+        HermiteInterpolation hermite_inter_che(nodes, node_vals, N);
 
         outputname = "newton_che_res_" + std::to_string(N) + ".txt";
         newton_inter_che.create_plot_data(draw_points_amount, interval, outputname);
         outputname = "lagrange_che_res_" + std::to_string(N) + ".txt";
         lagrange_inter_che.create_plot_data(draw_points_amount, interval, outputname);
+        outputname = "hermite_che_res_" + std::to_string(N) + ".txt";
+        hermite_inter_che.create_plot_data(draw_points_amount, interval, outputname);
     }
 
     create_best_fit_data<NewtonInterpolation>(interval, draw_points_amount);
     create_best_fit_data<LagrangeInterpolation>(interval, draw_points_amount);
+    create_best_fit_data<HermiteInterpolation>(interval, draw_points_amount);
 
     return 0;
 }
