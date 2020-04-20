@@ -6,9 +6,9 @@
 #include <fstream>
 #include <string>
 
-#include "interpolation.h"
+//#include "interpolation.h"
 #include "newton.h"
-//#include "lagrange.h"
+#include "lagrange.h"
 //#include "hermite.h"
 
 constexpr double PI = 3.141592653589;
@@ -101,6 +101,7 @@ std::pair<int,int> find_best_fit(std::pair<double,double> interval, const int& m
             best_fit_che = curr_fit;
             best_N_che = N;
         }
+        cheby_fd << N << " " << curr_fit << "\n";
 
         nodes_and_values = get_equally_distributed_nodes(interval, N);
         nodes = nodes_and_values.first;
@@ -115,10 +116,11 @@ std::pair<int,int> find_best_fit(std::pair<double,double> interval, const int& m
             best_fit_reg = curr_fit;
             best_N_reg = N;
         }
-       // std::cout << N << " " << curr_fit << "\n"; // Wypisywanie kolejnych fitow
-    }
-    std::cout << "Best N for interpolation by regular nodes: " << best_N_reg << std::endl;
-    std::cout << "Best N for interpolation by chebyshev nodes: " << best_N_che << std::endl;
+        reg_fd << N << " " << curr_fit << "\n";
+        std::cout << typeid(T).name() << " " << N << "\n";
+    } 
+    std::cout << "Best N for " << typeid(T).name() << " by regular nodes: " << best_N_reg << std::endl;
+    std::cout << "Best N for " << typeid(T).name() << " interpolation by chebyshev nodes: " << best_N_che << std::endl;
     std::pair<int,int> result(best_N_reg, best_N_che);
     return result;
 }
@@ -146,24 +148,42 @@ void create_best_fit_data(const std::pair<double,double> & interval, const int& 
     
     interpolation_che.create_plot_data(draw_points_amount, interval, type + "_best_fit_che.txt");
 }
-
+// Efekt Runge'go
+// Newton - N = 11
+// Lagrange - N = 11
 int main(){
     constexpr int draw_points_amount = 1e5;
     std::pair<double, double> interval(-2,2);
     std::string function_data_filename = "function_data.txt";
     create_plot_data(draw_points_amount, interval, function_data_filename);
 
-    std::vector<int> N_list = { 2, 3, 8, 9, 10, 12, 15, 20};
+    std::vector<int> N_list = {7,8,9,10,11,12,13};//{ 2, 5, 8, 10, 15, 20};
     for (const int& N : N_list){
-        std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_chebyshev_nodes(interval, N);
+        std::pair<std::vector<double>, std::vector<double>> nodes_and_values = get_equally_distributed_nodes(interval, N);
         std::vector<double> nodes = nodes_and_values.first;
         std::vector<double> node_vals = nodes_and_values.second;
-        NewtonInterpolation newton_inter(nodes, node_vals, N);
-        std::string outputname = "newton_res_" + std::to_string(N) + ".txt";
-        newton_inter.create_plot_data(draw_points_amount, interval, outputname);
+        NewtonInterpolation newton_inter_reg(nodes, node_vals, N);
+        LagrangeInterpolation lagrange_inter_reg(nodes, node_vals, N);
+
+        std::string outputname = "newton_reg_res_" + std::to_string(N) + ".txt";
+        newton_inter_reg.create_plot_data(draw_points_amount, interval, outputname);
+        outputname = "lagrange_reg_res_" + std::to_string(N) + ".txt";
+        lagrange_inter_reg.create_plot_data(draw_points_amount, interval, outputname);
+
+        nodes_and_values = get_chebyshev_nodes(interval, N);
+        nodes = nodes_and_values.first;
+        node_vals = nodes_and_values.second;
+        NewtonInterpolation newton_inter_che(nodes, node_vals, N);
+        LagrangeInterpolation lagrange_inter_che(nodes, node_vals, N);
+
+        outputname = "newton_che_res_" + std::to_string(N) + ".txt";
+        newton_inter_che.create_plot_data(draw_points_amount, interval, outputname);
+        outputname = "lagrange_che_res_" + std::to_string(N) + ".txt";
+        lagrange_inter_che.create_plot_data(draw_points_amount, interval, outputname);
     }
 
     create_best_fit_data<NewtonInterpolation>(interval, draw_points_amount);
+    create_best_fit_data<LagrangeInterpolation>(interval, draw_points_amount);
 
     return 0;
 }

@@ -6,4 +6,6 @@ main: main.cpp newton.cpp lagrange.cpp hermite.cpp
 
 clean:
 	rm -f main
-	rm -f function_data.txt newton_res_*
+	rm -f function_data.txt newton_* lagrange_*
+	rm -f *_err.txt
+	rm -f *_best_fit_*

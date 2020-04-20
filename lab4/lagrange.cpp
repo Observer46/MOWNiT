@@ -1,34 +1,26 @@
-#include "secant.h"
+#include "lagrange.h"
 
-namespace Secant{
-    // Function calculation root of the function using secant method
-    std::pair<__float128,int> secant_method(const std::pair<double,double>& interval, double func(const double&), const double& eps, const int& max_iter){
-        if (interval.second < interval.first)   
-            throw std::invalid_argument("Interval is not defined corretly!");
-        __float128 x_prev = interval.second;
-        __float128 x_prev2 = interval.first;
-        __float128 correction = (__float128) 1e-15;
-        __float128 root;
-        int iter;
+double LagrangeInterpolation::value(const double& x) const{
+    double value = 0.0;
+    for (unsigned i=0; i < N; i++){
+        double yi = node_vals[i];
+        double mul=1;
+        for (unsigned j=0; j < N; j++)
+            mul *= ( (i==j) ? 1 : (x - nodes[j]) / (nodes[i] - nodes[j]) );
+        value += yi * mul;
+    }
+    return value;
+}
 
-        if ( func(x_prev2) == std::numeric_limits<double>::infinity() )     
-            x_prev2 += correction;
-        if ( func(x_prev) == std::numeric_limits<double>::infinity() )     
-            x_prev -= correction;
-
-        for(iter=0; iter < max_iter; iter++){
-            root = (func(x_prev) * x_prev2 - func(x_prev2) * x_prev) / (func(x_prev) - func(x_prev2));
-            if ( abs((double) (root - x_prev)) < eps  && iter > 1)  // We don't want to actidentally end because
-                break;                                              // our first estimation of root was near x_prev
-            if (root == std::numeric_limits<double>::infinity() ){
-                root = x_prev;              // In case our iterations lead us to dividing by almost zero
-                std::cout << "Reached maximum capabilities of the format!\n";
-                break;
-            }
-            x_prev2 = x_prev;
-            x_prev = root;
-        }
-        std::pair<__float128,int> result(root, iter);
-        return result;
+void LagrangeInterpolation::create_plot_data(const int& point_amount, const std::pair<double,double>& interval, const std::string& filename) const{
+    double step = (interval.second - interval.first) / point_amount;
+    double x = interval.first;
+    std::ofstream dataForPlot;
+    dataForPlot.open(filename);
+    for (int i=0; i < point_amount; i++){
+        double val = this -> value(x);
+        dataForPlot << x << " " << val << "\n";
+        x += step;
     }
 }
+
