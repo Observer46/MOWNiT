@@ -21,7 +21,7 @@ inline double f1(const double& x){
     return sin(2.0*x/PI) * exp(-2.0 * x / PI);
 }
 
-// Trzecia funkcja przykladowa z parametrami  m = 3
+// Trzecia funkcja przykladowa z parametrem  m = 3
 inline double f2(const double& x){
     return sin(3.0 * x) * exp(-3.0 * x / PI);
 }
@@ -73,7 +73,6 @@ int main(){
     
     std::vector<int> N_list = {5,10,20,40};
     for(const int& N : N_list){
-        std::cout << N << "\n";
         std::vector<std::pair<double,double>> f1_sample = sample_points(N, interval, f1);
         std::vector<std::pair<double,double>> f2_sample = sample_points(N, interval, f2);
         create_sampled_points_plot_data(f1_sample, "f1_sample_" + std::to_string(N) + ".txt");      // Dane z probki
@@ -86,10 +85,10 @@ int main(){
         TrigonometricalApproximation f1_trig_approx(f1_sample, interval);
         TrigonometricalApproximation f2_trig_approx(f2_sample, interval);
         std::cout << "\tSample size: " << N << "\n";
-        std::cout << "f1 polynomial (efficient) approx sqr err: " << f1_poly_approx_opt.get_err() << "\n";
-        std::cout << "f2 polynomial (efficient) approx sqr err: " << f2_poly_approx_opt.get_err() << "\n";
-        std::cout << "f1 polynomial (min err) approx sqr err: " << f1_poly_approx.get_err() << "\n";
-        std::cout << "f2 polynomial (min err) approx sqr err: " << f2_poly_approx.get_err() << "\n";
+        std::cout << "f1 polynomial (m = min(N,6)) approx sqr err: " << f1_poly_approx_opt.get_err() << "\n";
+        std::cout << "f2 polynomial (m = min(N,6)) approx sqr err: " << f2_poly_approx_opt.get_err() << "\n";
+        std::cout << "f1 polynomial (m = N) approx sqr err: " << f1_poly_approx.get_err() << "\n";
+        std::cout << "f2 polynomial (m = N) approx sqr err: " << f2_poly_approx.get_err() << "\n";
         std::cout << "f1 trigonometrical approx sqr err: " << f1_trig_approx.get_err() << "\n";
         std::cout << "f2 trigonometrical approx sqr err: " << f2_trig_approx.get_err() << "\n\n";
         f1_poly_approx.create_plot_data(draw_points_amount, interval, "f1_poly_approx_data_" + std::to_string(N) + ".txt");

@@ -1,7 +1,7 @@
 # Makefile
 CCPP = g++ -Wall -std=c++17
 
-main: main.cpp polynomialApprox.cpp trigonometricalApprox.cpp aghMatrix.cpp sole.cpp
+main: main.cpp jacobi.cpp gaussseidel.cpp sor.cpp aghMatrix.cpp testSOLEs.cpp
 	$(CCPP)  main.cpp -o main
 
 clean:

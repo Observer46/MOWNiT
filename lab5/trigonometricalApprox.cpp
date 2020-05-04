@@ -10,7 +10,6 @@ TrigonometricalApproximation::TrigonometricalApproximation(const std::vector<std
     a0 /= n;                    // Juz podzielone przez 2
     this->a.push_back(a0);      // Zerowa iteracja
     this->b.push_back(0.0);
-    std::cout << "m = " << this->m << "\n";
      
     for(unsigned k=1; k < m; k++){
         double a_k = 0.0;
