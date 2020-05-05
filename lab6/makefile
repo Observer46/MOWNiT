@@ -6,4 +6,4 @@ main: main.cpp jacobi.cpp gaussseidel.cpp sor.cpp aghMatrix.cpp testSOLEs.cpp
 
 clean:
 	rm -f main
-	rm -f f1*.txt newton_* f2*.txt
+	rm -f *example*.txt

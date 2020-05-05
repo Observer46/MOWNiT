@@ -8,8 +8,8 @@
 template <typename T> class TestSOLEs    // Test System Of Linear Equations
 {
     static constexpr size_t sole_count = 8;
-    std::vector< std::vector<AGHMatrix<T>> > soles;   // Uklady trzymamy jako pary macierzy (A, b), zatem kazdy vector wewnatrz ma rozmar 2
-    size_t _size;
+    std::vector< std::vector<AGHMatrix<T>> > soles;     // Uklady trzymamy jako pary macierzy (A, b, x), zatem kazdy vector wewnatrz ma rozmar 3
+    size_t _size;                                       // trzymamy tez dokladnie rozwiazanie, aby szacowac blad przyblizenia
 
 public:
     TestSOLEs();

@@ -53,6 +53,8 @@ public:
 
     // Transposition
     AGHMatrix<T>& transpose();
+
+    static AGHMatrix<T> solve_gauss(const AGHMatrix<T>& A, const AGHMatrix<T>& b);
 };
 
 template<typename T>

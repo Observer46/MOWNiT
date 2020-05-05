@@ -18,6 +18,8 @@ public:
 
     // Transformuje punkt z przedzialu [a,b] na przedzial [0, 2*pi] wedlug formuly:
     // vi := 2*pi * (x-a)/(b-a)
-    double trans_to_trig(const double& x) const  { return 2*PI * (x - interval.first) / (interval.second - interval. first); }
+    double trans_to_trig(const double& x) const  { 
+        return 2*PI * (x - interval.first) / (interval.second - interval. first); 
+    }
 };
 #include "trigonometricalApprox.cpp"

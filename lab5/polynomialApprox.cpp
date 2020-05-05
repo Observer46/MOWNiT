@@ -28,8 +28,8 @@ PolynomialApproximation::PolynomialApproximation(const std::vector<std::pair<dou
     }
     
     SOLE<double> sys_of_equations(this->G_mat, this->B_mat);
-    
     this->A_mat = sys_of_equations.solve_gauss();
+    
     double err_sum = 0.0;
     for(unsigned i=0; i < n; i++){
         double xi = sample_points[i].first;

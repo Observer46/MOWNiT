@@ -1,7 +1,7 @@
 #include "sor.h"
 
 template <typename T>                                                 // W jakikolwiek sposob inicjalizujemy x_mat
-SOR<T>::SOR(const AGHMatrix<T>& A_mat, const AGHMatrix<T>& b_mat, const double& omega, const unsigned& iterations, const double& eps) : A_mat{A_mat}, b_mat{b_mat}, x_mat{b_mat}, omega{omega} {
+SOR<T>::SOR(const AGHMatrix<T>& A_mat, const AGHMatrix<T>& b_mat, const AGHMatrix<T>& solution, const double& omega, const unsigned& iterations, const unsigned& example_no, const double& eps) : A_mat{A_mat}, b_mat{b_mat}, x_mat{b_mat}, omega{omega} {
     if( A_mat.get_rows() != b_mat.get_rows() )
         throw std::invalid_argument("Cannot build system of linear equations out of this matrices!");
     if( b_mat.get_cols() != 1)
@@ -11,7 +11,11 @@ SOR<T>::SOR(const AGHMatrix<T>& A_mat, const AGHMatrix<T>& b_mat, const double& 
     unsigned A_cols = A_mat.get_cols();
     double improv = eps + 1.0;          // Cos, co bedzie spelnialo poczatkowego warunku
 
+    std::ofstream err_data;
+    err_data.open("SOR_example_" + std::to_string(example_no) + ".txt");
+
     for(unsigned k=0; k < iterations && improv > eps; k++){
+        improv = 0.0;
         AGHMatrix<T> prev_sol(this->x_mat);
         for(unsigned i=0; i < A_rows; i++){
             T sum{};
@@ -31,5 +35,12 @@ SOR<T>::SOR(const AGHMatrix<T>& A_mat, const AGHMatrix<T>& b_mat, const double& 
             if (delta > improv)
                 improv = delta;
         }
+        if (k < 10){
+            double delta_from_res = 0.0;
+            for(unsigned i=0; i < A_rows; i++)
+                delta_from_res += std::abs(solution(i, 0) - this->x_mat(i, 0));
+            err_data << k+1 << " " << delta_from_res << "\n";
+        }
     }
+    err_data.close();
 }

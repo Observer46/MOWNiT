@@ -246,6 +246,37 @@ AGHMatrix<T>& AGHMatrix<T>::transpose(){
 }
 ///////////////////////////////////////////
 
+template<typename T>
+AGHMatrix<T> AGHMatrix<T>::solve_gauss(const AGHMatrix<T>& A, const AGHMatrix<T>& b){
+    unsigned A_rows = A.get_rows();
+    unsigned A_cols = A.get_cols();
+    T initial{};
+
+    AGHMatrix<T> augmented (A_rows, A_cols + 1, initial);
+    for(unsigned i=0; i < A_rows; i++){
+        for(unsigned j=0; j < A_cols; j++)
+            augmented(i, j) = A(i, j);
+        augmented(i, A_cols) = b(i, 0);
+    }
+
+    gaussian_elimination(augmented);
+
+    std::vector<std::vector<T>> solution;
+    solution.resize( augmented.get_rows() );
+    int sol_idx = (int) augmented.get_cols() - 1;
+
+    for(int i=(int) augmented.get_rows() - 1; i >= 0; i-- ){
+        T x = augmented(i, sol_idx);
+        for(int j=sol_idx - 1; j > i; j--)
+            x -= augmented(i, j) * solution[j][0];
+        x /= augmented(i, i);
+        solution[i].push_back(x);
+    }
+    AGHMatrix<T> solution_matrix (solution);
+    return solution_matrix;
+}
+
+
 // Eliminacja Gaussa (zadanie 5)
 ///////////////////////// 
 template <typename T>

@@ -19,12 +19,15 @@
 
 int main(){
     TestSOLEs<double> soles_for_tests;
+    const double omega = 0.9;
+    const unsigned iterations = 30;
     for(size_t i=0; i < test_count; i++){
         std::vector<AGHMatrix<double>> sole_i = soles_for_tests.get_sole(i);
-        Jacobi<double> jacobi_solution(sole_i[0], sole_i[1], 30);
-        GaussSeidel<double> gauss_seidel_solution(sole_i[0], sole_i[1], 30);
-        SOR<double> sor_solution(sole_i[0], sole_i[1], 1.25, 30);
-        std::cout << jacobi_solution.get_solution() << gauss_seidel_solution.get_solution() << sor_solution.get_solution() << "\n\n\n";
+        std::cout << "\t Przyklad " << i + 1 << ":\nA:\n" << sole_i[0] << "b:\n" << sole_i[1] << "Poprawna odpowiedz:\n" << sole_i[2] << "--------\n\n";
+        Jacobi<double> jacobi_solution(sole_i[0], sole_i[1], sole_i[2], iterations, i+1);
+        GaussSeidel<double> gauss_seidel_solution(sole_i[0], sole_i[1], sole_i[2], iterations, i+1);
+        SOR<double> sor_solution(sole_i[0], sole_i[1], sole_i[2], omega, iterations, i+1);
+        std::cout << "Jacobi:\n" << jacobi_solution.get_solution() << "Gauss-Seidel:\n" << gauss_seidel_solution.get_solution() << "Successive Over-Relaxation:\n" << sor_solution.get_solution() << "\n\n\n";
     }
     return 0;
 }

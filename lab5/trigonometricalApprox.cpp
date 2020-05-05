@@ -18,8 +18,8 @@ TrigonometricalApproximation::TrigonometricalApproximation(const std::vector<std
             double vi =  2.0 * PI * i / n;
             double fvi = sample[i].second;      // Podmieniamy f(vi) na f(x) - kompresujemy funkcje z przedzialu [a,b] ma przedzial [0,2pi]
             double arg = (double) k*vi;
-            a_k += fvi * (double) cos(arg);
-            b_k += fvi * (double) sin(arg);
+            a_k += fvi * cos(arg);
+            b_k += fvi * sin(arg);
         }
         a_k *=  2.0 / n;
         b_k *=  2.0 / n;
@@ -38,7 +38,7 @@ TrigonometricalApproximation::TrigonometricalApproximation(const std::vector<std
 
 double TrigonometricalApproximation::value(const double& x) const{
     double trans_x = this->trans_to_trig(x);
-    double sum = 0.0;
+    double sum = 0.0;   // Wspolczynniki tak przygotowane, ze mnozenie mozna zaczac od k=0
     for(unsigned k=0; k < this->m; k++){     // a[0] := a0/2
         double arg = (double) k * trans_x;
         sum +=  this->a[k] * cos(arg) + this->b[k] * sin(arg);
